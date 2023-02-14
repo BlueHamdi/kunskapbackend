@@ -30,6 +30,22 @@ app.get("/api/user", (req, res, next) => {
     })
 })
 
+
+app.get("/api/contact", (req, res, next) => {
+
+    let sql1 = "select * from Contact"
+    let params = []
+    db.all(sql1, params, (err, rows) => {
+        if (err) {
+            res.status(400).json({"error":err.message});
+            return;
+        }
+        res.json({
+            "message":"success",
+            "Contact":rows
+        })
+    })
+})
 /* app.get("/api/bookcategory/:cat", (req, res, next) => {
     let sql = "select * from book where bookCategory = ?"
     let params = [req.params.cat]
