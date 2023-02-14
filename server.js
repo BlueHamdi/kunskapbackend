@@ -1,7 +1,7 @@
-    const express = require("express")
-    const app = express()
-    const cors = require('cors')
-    const db = require("./database.js")
+const express = require("express")
+const app = express()
+const cors = require('cors')
+const db = require("./database.js")
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -34,26 +34,31 @@ const rateLimit = require("express-rate-limit");
     })
     app.put("/api/user/:id", (req, res, next) => {
       if (!req.body.UserScore) {
-          res.status(400).json({"error": "UserScore is required"});
-          return;
+        res.status(400).json({"error": "UserScore is required"});
+        return;
       }
-  
-      let sql = "UPDATE User SET UserScore = ? WHERE UserId = ? and UserScore > ?"
+    
+      if (!req.params.id || req.params.id === "") {
+        res.status(400).json({"error": "User ID is required"});
+        return;
+      }
+    
+      let sql = "UPDATE User SET UserScore = ? WHERE UserId = ? AND (UserScore > ? OR UserScore IS NULL)"
+    
       let params = [req.body.UserScore, req.params.id, req.body.UserScore]
       db.run(sql, params, function (err, result) {
-          if (err) {
-              res.status(400).json({"error":err.message});
-              return;
-          }
-          res.json({
-              "message": "success",
-              "data": result
-          })
+        if (err) {
+          res.status(400).json({"error":err.message});
+          return;
+        }
+        res.json({
+          "UserScore": req.body.UserScore
+        })
       });
-  });
+    });
 const SECRET = "your_secret_key"; // replace with your own secret key
 
-// Create rate limiter
+// Create rate limiteryy
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
@@ -108,7 +113,21 @@ app.post('/login', loginLimiter, (req, res) => {
     }
   );
 ;
+app.get("/api/contact", (req, res, next) => {
 
+  let sql1 = "select * from Contact"
+  let params = []
+  db.all(sql1, params, (err, rows) => {
+      if (err) {
+          res.status(400).json({"error":err.message});
+          return;
+      }
+      res.json({
+          "message":"success",
+          "Contact":rows
+      })
+  })
+})
 
 
 
@@ -143,66 +162,36 @@ app.post('/login', loginLimiter, (req, res) => {
 })
 
 
-app.post("/api/books", (req, res, next) => {
-    let data = {
-        bookTitle: req.body.bookTitle,
-        bookAuthor: req.body.bookAuthor,
-        bookIsbn: req.body.bookIsbn,
-        bookText: req.body.bookText,
-        bookCategory: req.body.bookCategory
-    }
-    let sql ='INSERT INTO book (bookTitle, bookAuthor, bookIsbn, bookText, bookCategory) VALUES (?,?,?,?,?)'
-    let params =[data.bookTitle, data.bookAuthor, data.bookIsbn, data.bookText, data.bookCategory]
-    db.run(sql, params, function (err, result) {
-        if (err){
-            res.status(400).json({"error": err.message})
-            return;
-        }
-        res.json({
-            "message": "success",
-            "book": data,
-            "id" : this.lastID
-        })
-    })
-})
-
-app.put("/api/books", (req, res, next) => {
-    let data = {
-            bookTitle: req.body.bookTitle,
-            bookAuthor: req.body.bookAuthor,
-            bookIsbn: req.body.bookIsbn,
-            bookText: req.body.bookText,
-            bookCategory: req.body.bookCategory
 
 
-    }
-    let sql ='UPDATE book SET bookTitle = ?, bookAuthor = ?, bookIsbn = ?, bookText = ?, bookCategory=? WHERE bookId = ?'
-    let params =[data.bookTitle, data.bookAuthor, data.bookIsbn, data.bookText, data.bookCategory]
-    db.run(sql, params, function (err, result) {
-        if (err){
-            res.status(400).json({"error": err.message})
-            return;
-        }
-        res.json({
-            "message": "success",
-            "book": data,
-            "id" : this.lastID
-        })
-    })
-})
 
-app.delete("/api/books", (req, res, next) => {
-    db.run(
-        'DELETE FROM book WHERE bookId = ?',
-        req.body.bookId,
-        function (err, result) {
-            if (err){
-                res.status(400).json({"error": res.message})
-                return;
-            }
-            res.json({"message":"deleted", rows: this.changes})
-        })
-})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 
 
 const express = require('express');
 const bcrypt = require('bcrypt');
