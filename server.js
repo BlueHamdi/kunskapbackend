@@ -32,20 +32,21 @@ const rateLimit = require("express-rate-limit");
             })
         })
     })
-    app.put("/api/user/:id", (req, res, next) => {
+
+    app.put("/api/user/:UserName", (req, res, next) => {
       if (!req.body.UserScore) {
         res.status(400).json({"error": "UserScore is required"});
         return;
       }
     
-      if (!req.params.id || req.params.id === "") {
-        res.status(400).json({"error": "User ID is required"});
+      if (!req.params.UserName || req.params.UserName === "") {
+        res.status(400).json({"error": "UserName is required"});
         return;
       }
     
-      let sql = "UPDATE User SET UserScore = ? WHERE UserId = ? AND (UserScore > ? OR UserScore IS NULL)"
+      let sql = "UPDATE User SET UserScore = ? WHERE UserName = ? AND (UserScore > ? OR UserScore IS NULL)"
     
-      let params = [req.body.UserScore, req.params.id, req.body.UserScore]
+      let params = [req.body.UserScore, req.params.UserName, req.body.UserScore]
       db.run(sql, params, function (err, result) {
         if (err) {
           res.status(400).json({"error":err.message});
@@ -53,9 +54,15 @@ const rateLimit = require("express-rate-limit");
         }
         res.json({
           "UserScore": req.body.UserScore
+          
+
+
+
+
         })
       });
     });
+ 
 const SECRET = "your_secret_key"; // replace with your own secret key
 
 // Create rate limiteryy
